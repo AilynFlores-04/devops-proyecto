@@ -1,13 +1,6 @@
-def saludo(nombre):
-<<<<<<< HEAD
-    return f"Buenos días, {nombre}!"
-=======
-    return f"Buenas tardes, {nombre}!"
->>>>>>> rama-b
+def main():
+    pass
 
-print(saludo("DevOps"))
 
-def despedida(nombre):
-    return f"Adiós, {nombre}!"
-
-print(despedida("DevOps"))
+if __name__ == "__main__":
+    main()
