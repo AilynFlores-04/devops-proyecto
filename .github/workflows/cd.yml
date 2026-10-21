@@ -16,15 +16,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Simular deploy en Staging
+      - name: Verificar configuración del ambiente
         run: |
           echo "========================================="
           echo "  DEPLOY A STAGING"
-          echo "  Versión: ${{ github.sha }}"
           echo "  Ambiente: ${{ vars.APP_ENV }}"
           echo "  Réplicas: ${{ vars.REPLICA_COUNT }}"
+          echo "  DB configurada: ${{ secrets.DB_URL != '' && 'SI' || 'NO' }}"
           echo "========================================="
-          echo "Deploy completado exitosamente en staging"
+
+      - name: Ejecutar despliegue simulado
+        run: |
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh ${{ github.sha }}
 
   deploy-production:
     name: Deploy → Production
@@ -35,12 +39,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Simular deploy en Producción
+      - name: Verificar configuración del ambiente
         run: |
           echo "========================================="
           echo "  DEPLOY A PRODUCCIÓN"
-          echo "  Versión: ${{ github.sha }}"
           echo "  Ambiente: ${{ vars.APP_ENV }}"
           echo "  Réplicas: ${{ vars.REPLICA_COUNT }}"
+          echo "  DB configurada: ${{ secrets.DB_URL != '' && 'SI' || 'NO' }}"
           echo "========================================="
-          echo "Deploy completado exitosamente en producción"
+
+      - name: Ejecutar despliegue simulado
+        run: |
+          chmod +x scripts/deploy.sh
+          ./scripts/deploy.sh ${{ github.sha }}
