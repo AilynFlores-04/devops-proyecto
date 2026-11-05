@@ -1,54 +1,32 @@
-name: CD Pipeline
+name: CD Pipeline - AKS Deploy
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    branches: [main]
-    types: [completed]
+  push:
+    branches: [ "main" ]
 
 jobs:
   deploy-staging:
-    name: Deploy → Staging
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-    environment: staging
-
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout del código
+        uses: actions/checkout@v3
 
-      - name: Verificar configuración del ambiente
+      - name: Login en Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Conectar a AKS
         run: |
-          echo "========================================="
-          echo "  DEPLOY A STAGING"
-          echo "  Ambiente: ${{ vars.APP_ENV }}"
-          echo "  Réplicas: ${{ vars.REPLICA_COUNT }}"
-          echo "  DB configurada: ${{ secrets.DB_URL != '' && 'SI' || 'NO' }}"
-          echo "========================================="
+          az aks get-credentials \
+            --resource-group rg-devops-academia \
+            --name aks-devops \
+            --overwrite-existing
 
-      - name: Ejecutar despliegue simulado
+      - name: Instalación/Actualización con Helm
         run: |
-          chmod +x scripts/deploy.sh
-          ./scripts/deploy.sh ${{ github.sha }}
-
-  deploy-production:
-    name: Deploy → Production
-    needs: deploy-staging
-    runs-on: ubuntu-latest
-    environment: production
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Verificar configuración del ambiente
-        run: |
-          echo "========================================="
-          echo "  DEPLOY A PRODUCCIÓN"
-          echo "  Ambiente: ${{ vars.APP_ENV }}"
-          echo "  Réplicas: ${{ vars.REPLICA_COUNT }}"
-          echo "  DB configurada: ${{ secrets.DB_URL != '' && 'SI' || 'NO' }}"
-          echo "========================================="
-
-      - name: Ejecutar despliegue simulado
-        run: |
-          chmod +x scripts/deploy.sh
-          ./scripts/deploy.sh ${{ github.sha }}
+          helm upgrade --install devops-app helm/devops-app \
+            --namespace staging \
+            --create-namespace \
+            --set image.tag=1.25-alpine \
+            --wait --timeout 5m
