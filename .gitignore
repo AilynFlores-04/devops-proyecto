@@ -3,3 +3,10 @@ __pycache__/
 .pytest_cache/
 .vscode/
 .env
+
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars.local
+.terraform.lock.hcl
